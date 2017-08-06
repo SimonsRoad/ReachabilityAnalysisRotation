@@ -24,17 +24,13 @@ number_steps = (tFinal-tStart)/timeStep;
 % INITIAL CONDITIONS
 %----------------------------------------------------------------------
 IC = interval([-1;-1], [1;1]);
-%IC = interval([-1;-1], [2;3]);
-%IC = interval([1;-2], [3.5;1]);
-
-
 IC_z = zonotope(IC);
 IC_z_generators = get(IC_z, 'Z');
 IC_z_generators = IC_z_generators(:, 2:length(IC_z_generators));
 IC_c = center(IC_z);
 
 % add extra generators
-d = 10;
+d = 100;
 dim = d+2;
 extraScale = 10/d;
 extraG = extraScale*generatePts(d, 2);
@@ -46,9 +42,6 @@ IC_z = zonotope(IC_mat);
 % CONSTRAINTS
 %----------------------------------------------------------------------
 CS = interval([-1.1;-1.2], [1.2;1.3]);
-%CS = interval([-2.1;-3.2], [4;5]);
-%CS = interval([-2;-3], [4;3]);
-
 CS_z = zonotope(CS);
 %----------------------------------------------------------------------
 
@@ -58,7 +51,6 @@ CS_z = zonotope(CS);
 A = [0   -1;
      1   0];
 % transformation from continuous to discrete time
-%A_d = @(t) expm(A*t*timeStep);
 A_d = expm(A*timeStep);
 %----------------------------------------------------------------------
 
@@ -66,7 +58,6 @@ A_d = expm(A*timeStep);
 %----------------------------------------------------------------------
 % keep track of initial set scalings
 scaledICs = [];
-%scaledICs = horzcat(scaledICs, IC_z);
 
 % keep track of the reach sets
 R_zs = [];
@@ -87,8 +78,7 @@ for s=1:number_steps
 
             subject to
             for i=1:dim
-                alpha_gx(i) >= 0.1 %100/d;
-                %alpha_gx(i) <= 0.2 %10/d;
+                alpha_gx(i) >= 0.1 
             end
 
             % scaled initial set is inside unscaled one
@@ -146,7 +136,7 @@ plot(IC, [1,2], 'y','lineWidth',2);
 plot(CS, [1,2], 'g','lineWidth',2);
 pause(1);
 
-% plot scalings of initial set
+% plots of scaled sets and their corresponding reach sets
 for i=1:number_steps
     plot(scaledICs(i), [1,2], 'r','lineWidth',i);
     pause(2);
