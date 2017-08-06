@@ -91,7 +91,7 @@ for s=1:number_steps
 
         cvx_end
         
-       [IC_z_generators_copy, alphas, scaledICs, R_zs, IC_z_copy] = ...
+       [IC_z_generators_copy, alphas, scaledICs, R_zs, IC_z_copy, IC_c_copy] = ...
            updateZonotopes(alpha_gx, IC_z_generators_copy, IC_c_copy, alphas, dim, s, scaledICs, A_d, R_zs);
     
     else
@@ -117,15 +117,12 @@ for s=1:number_steps
 
             cvx_end
         
-       [IC_z_generators_copy, alphas, scaledICs, R_zs, IC_z_copy] = ...
+       [IC_z_generators_copy, alphas, scaledICs, R_zs, IC_z_copy, IC_c_copy] = ...
            updateZonotopes(alpha_gx, IC_z_generators_copy, IC_c_copy, alphas, dim, s, scaledICs, A_d, R_zs);
    end
 
    
 end
-
-alphas
-size(alphas)
 
 % PLOTS
 %----------------------------------------------------------------------
