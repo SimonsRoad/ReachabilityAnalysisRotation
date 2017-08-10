@@ -8,14 +8,15 @@
 
 % parameters of interest:
 % - timeStep and tFinal
-% - IC and CS (initial and constraint sets)
+% - IC and CS (centered or skewed)
 % - d and extraScale (number of random generators and their length)
+% - alpha_gx(i) >= ...; alpha_gx(i) <= ... bounds on generator scalars
 
 % TIME
 %----------------------------------------------------------------------
 % potentially will need to get rid of the similar fields in the options
 tStart=0; %start time
-tFinal=5; %final time
+tFinal=2; %final time
 timeStep=1; %time step size for reachable set computation
 % number of linearization points
 number_steps = (tFinal-tStart)/timeStep;
@@ -23,6 +24,8 @@ number_steps = (tFinal-tStart)/timeStep;
 
 % INITIAL CONDITIONS
 %----------------------------------------------------------------------
+%number of state variables
+d = 2;
 %IC = interval([-1;-1], [1;1]);
 %IC = interval([-1;-1], [2;3]);
 IC = interval([1;-2], [3.5;1]);
@@ -34,10 +37,10 @@ IC_z_generators = IC_z_generators(:, 2:length(IC_z_generators));
 IC_c = center(IC_z);
 
 % add extra generators
-d = 20;
-dim = d+2;
-extraScale = 10/d;
-extraG = extraScale*generatePts(d, 2);
+d_extra = 20;
+dim = d_extra+d;
+extraScale = 10/d_extra;
+extraG = extraScale*generatePts(d_extra, 2);
 IC_z_generators = horzcat(IC_z_generators, extraG);
 IC_mat = horzcat(IC_c, IC_z_generators);
 IC_z = zonotope(IC_mat);
@@ -70,8 +73,10 @@ scaledICs = [];
 % keep track of the reach sets
 R_zs = [];
 
-% initialize vector of coefficients
+% initialize vector of coefficients for backward reachability
 alphas = zeros(dim*number_steps, 1);
+% keep track of total center shifts for backward reachability
+center_shift = zeros(d, 1);
 
 % initialize intermediate values for center and generator matrix
 IC_c_copy = IC_c;
@@ -90,9 +95,9 @@ for s=1:number_steps
             for i=1:dim
                 alpha_gx_low(i) >= -1;
                 alpha_gx_low(i) <= 1;
+                % make sure that additional generators don't degenerate
                 alpha_gx_high(i) >= -1;
                 alpha_gx_high(i) <= 1;
-                % make sure that additional generators don't degenerate
                 alpha_gx_low(i)+0.1 <= alpha_gx_high(i);
             end
             
@@ -105,7 +110,7 @@ for s=1:number_steps
                  - abs(IC_z_generators_copy)*(alpha_gx_high - alpha_gx_low)/2 >= infimum(IC);
             end
             
-            % scaled initial condition is within the constraint set
+           % scaled initial condition is within the constraint set
            IC_c_copy + IC_z_generators_copy*(alpha_gx_high + alpha_gx_low)/2 ...
            + abs(IC_z_generators_copy)*(alpha_gx_high - alpha_gx_low)/2  <= supremum(CS);
            IC_c_copy + IC_z_generators_copy*(alpha_gx_high + alpha_gx_low)/2 ...
@@ -119,9 +124,13 @@ for s=1:number_steps
 
         cvx_end
         
-       [IC_z_generators_copy, alphas, scaledICs, R_zs, IC_z_copy, IC_c_copy] = ...
-           updateZonotopes(alpha_gx_low, alpha_gx_high, IC_z_generators_copy, IC_c_copy, alphas, dim, s, scaledICs, A_d, R_zs);   
+       [IC_z_generators_copy, alphas, center_shift, scaledICs, R_zs, IC_z_copy, IC_c_copy] = ...
+           updateZonotopesWithBounds(alpha_gx_low, alpha_gx_high, IC_z_generators_copy, IC_c_copy, alphas, center_shift, dim, s, scaledICs, A_d, R_zs);   
+alpha_gx_low
+alpha_gx_high
 end
+
+alphas
 
 % ACCUMULATE SCALARS - APPLY TO INITIAL SET
 %----------------------------------------------------------------------
@@ -133,7 +142,7 @@ for j=1:dim
     end
     IC_z_mat = horzcat(IC_z_mat, tempGenerator);
 end
-IC_z_mat = horzcat(IC_c, IC_z_mat);
+IC_z_mat = horzcat(IC_c + center_shift, IC_z_mat);
 IC_z_g = zonotope(IC_z_mat);
 %----------------------------------------------------------------------
 
@@ -154,4 +163,9 @@ for i=1:number_steps
     pause(1);
     plot(R_zs(i), [1,2],'b','lineWidth',2);
     pause(1)
+end
+
+% evolve the safe set forward to illustrate the outcome (proof of concept)
+for i=1:number_steps
+    plot(A_d^i*IC_z_g, [1,2], 'g', 'lineWidth', 2);
 end
