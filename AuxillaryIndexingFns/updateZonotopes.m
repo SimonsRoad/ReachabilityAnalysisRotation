@@ -1,17 +1,23 @@
+% scaling and reach set updating for implementation with lower and upper
+% bound scalars on generators
+
 function [IC_z_generators_copy, alphas, scaledICs, R_zs, IC_z_copy, IC_c_copy] = ...
-    updateZonotopes(alpha_gx, IC_z_generators_copy, IC_c_copy, alphas, dim, s, scaledICs, A_d, R_zs)
+    updateZonotopes(alpha_gx_low, alpha_gx_high, IC_z_generators_copy, IC_c_copy, alphas, dim, s, scaledICs, A_d, R_zs)
          % add scalars from the current iteration to the vector of scalars
         for j=1:dim
-            alphas(generatorIndex(dim, s)+j) = alpha_gx(j);
+            alphas(generatorIndex(dim, s)+j) = (alpha_gx_high(j) - alpha_gx_low(j))/2;
         end
         
-        % update the generator matrix to construct a scaling of the initial set
-        % later, will need to update center in the interval implementation as well
+        % update the center of the scaled initial set
+        IC_c_copy = IC_c_copy + IC_z_generators_copy*(alpha_gx_high + alpha_gx_low)/2;
+        
+        % update the generator matrix to construct scaling of the initial set      
         IC_z_g =[];
         for i=1:dim
-            IC_z_g = horzcat(IC_z_g, alpha_gx(i)*IC_z_generators_copy(:,i));
+            IC_z_g = horzcat(IC_z_g, (alpha_gx_high(i) - alpha_gx_low(i))/2*IC_z_generators_copy(:,i));
         end
         IC_z_generators_copy = IC_z_g;
+
 
         % construct scalings of initial sets
         IC_z_copy_mat = horzcat(IC_c_copy, IC_z_generators_copy);
