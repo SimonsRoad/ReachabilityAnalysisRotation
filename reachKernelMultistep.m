@@ -125,7 +125,7 @@ for s=1:number_steps
         cvx_end
         
        [IC_z_generators_copy, alphas, center_shift, scaledICs, R_zs, IC_z_copy, IC_c_copy] = ...
-           updateZonotopesWithBounds(alpha_gx_low, alpha_gx_high, IC_z_generators_copy, IC_c_copy, alphas, center_shift, dim, s, scaledICs, A_d, R_zs);   
+           updateZonotopes(alpha_gx_low, alpha_gx_high, IC_z_generators_copy, IC_c_copy, alphas, center_shift, dim, s, scaledICs, A_d, R_zs);   
 alpha_gx_low
 alpha_gx_high
 end
