@@ -8,9 +8,8 @@
 
 % parameters of interest:
 % - timeStep and tFinal
-% - IC and CS (centered or skewed)
+% - IC and CS (initial and constraint sets)
 % - d and extraScale (number of random generators and their length)
-% - alpha_gx(i) >= ...; alpha_gx(i) <= ... bounds on generator scalars
 
 % TIME
 %----------------------------------------------------------------------
