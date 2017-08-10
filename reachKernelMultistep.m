@@ -9,7 +9,7 @@
 % parameters of interest:
 % - timeStep and tFinal
 % - IC and CS (centered or skewed)
-% - d and extraScale (number of random generators and their length)
+% - d and d_extra (state space size and number of random generators)
 % - alpha_gx(i) >= ...; alpha_gx(i) <= ... bounds on generator scalars
 
 % TIME
@@ -33,7 +33,7 @@ IC = interval([1;-2], [3.5;1]);
 
 IC_z = zonotope(IC);
 IC_z_generators = get(IC_z, 'Z');
-IC_z_generators = IC_z_generators(:, 2:length(IC_z_generators));
+IC_z_generators = IC_z_generators(:, 2:end);
 IC_c = center(IC_z);
 
 % add extra generators
