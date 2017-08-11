@@ -35,8 +35,7 @@ function [IC_z_generators_copy, alphas, center_shift, scaledICs, R_zs, IC_z_copy
         % the next initial condition is the reach set from this
         % iteration
         IC_z_copy = reachSet;
-        % make a generator matrix for the reach set in the previous
-        % step, scale the generators and construct the new initial set
+        % make a generator matrix for the new reach set
         IC_z_generators_copy = get(IC_z_copy, 'Z');
         IC_z_generators_copy = IC_z_generators_copy(:, 2:end);   
         
